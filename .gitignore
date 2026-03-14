@@ -67,3 +67,7 @@ CrashReport*
 
 # PlasticSCM
 .plastic/
+
+# Documents
+ProjectInfo.md
+GEMINI.md
