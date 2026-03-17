@@ -8,15 +8,12 @@ public class PlayerMove : MonoBehaviour
     PlayerInput m_playerInput;
     InputActionMap m_playerActionMap;
     InputAction m_moveAction;
-    InputAction m_lookAction;
     InputAction m_jumpAction;
 
     Rigidbody m_rigidbody;
     Animator m_animator;
 
     private Vector2 m_moveAmt;
-    private Vector2 m_lookAmt;
-
     [SerializeField] float m_speed = 5.0f;
     [SerializeField] float m_rotateSpeed = 100.0f;
     [SerializeField] float m_jumpSpeed = 5.0f;
@@ -31,10 +28,6 @@ public class PlayerMove : MonoBehaviour
         m_moveAction = m_playerActionMap.FindAction("Move");
         m_moveAction.performed += OnMove;
         m_moveAction.canceled += OnMove;
-
-        m_lookAction = m_playerActionMap.FindAction("Look");
-        m_lookAction.performed += OnLook;
-        m_lookAction.canceled += OnLook;
 
         m_jumpAction = m_playerActionMap.FindAction("Jump");
         m_jumpAction.started += OnJump;
@@ -66,16 +59,6 @@ public class PlayerMove : MonoBehaviour
         }
     }
 
-    public void OnLook(InputAction.CallbackContext value)
-    {
-        if (value.canceled)
-        {
-            m_lookAmt = Vector2.zero;
-            return;
-        }
-        m_lookAmt = value.ReadValue<Vector2>();
-    }
-
     public void OnJump(InputAction.CallbackContext value)
     {
         if (m_isJumping) return;
@@ -89,7 +72,6 @@ public class PlayerMove : MonoBehaviour
     private void FixedUpdate()
     {
         Walking();
-        Rotating();
     }
 
     private void Walking()
@@ -102,18 +84,6 @@ public class PlayerMove : MonoBehaviour
         Vector3 moveDir = transform.forward * m_moveAmt.y + transform.right * m_moveAmt.x;
         m_rigidbody.MovePosition(m_rigidbody.position + m_speed * Time.deltaTime * moveDir);
 
-    }
-
-    private void Rotating()
-    {
-        if (m_lookAmt.sqrMagnitude < 0.01f)
-        {
-            return;
-        }
-
-        float rotationAmount = m_lookAmt.x * m_rotateSpeed * Time.deltaTime;
-        Quaternion deltaRotation = Quaternion.Euler(0, rotationAmount, 0);
-        m_rigidbody.MoveRotation(m_rigidbody.rotation * deltaRotation);
     }
 
     void OnCollisionEnter(Collision collision)
