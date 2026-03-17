@@ -1,9 +1,19 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(Rigidbody), typeof(Animator))]
+[RequireComponent(typeof(Rigidbody), typeof(Animator), typeof(PlayerInput))]
 public class PlayerMove : MonoBehaviour
 {
+    PlayerInput m_playerInput;
+    InputActionMap m_playerActionMap;
+    InputAction m_moveAction;
+    InputAction m_lookAction;
+    InputAction m_jumpAction;
+
+    Rigidbody m_rigidbody;
+    Animator m_animator;
+
     private Vector2 m_moveAmt;
     private Vector2 m_lookAmt;
 
@@ -11,30 +21,68 @@ public class PlayerMove : MonoBehaviour
     [SerializeField] float m_rotateSpeed = 100.0f;
     [SerializeField] float m_jumpSpeed = 5.0f;
 
-    Rigidbody m_rigidbody;
-    Animator m_animator;
+    private bool m_isJumping;
 
     private void Awake()
     {
+        m_playerInput = GetComponent<PlayerInput>();
+        m_playerActionMap = m_playerInput.actions.FindActionMap("Player");
+
+        m_moveAction = m_playerActionMap.FindAction("Move");
+        m_moveAction.performed += OnMove;
+        m_moveAction.canceled += OnMove;
+
+        m_lookAction = m_playerActionMap.FindAction("Look");
+        m_lookAction.performed += OnLook;
+        m_lookAction.canceled += OnLook;
+
+        m_jumpAction = m_playerActionMap.FindAction("Jump");
+        m_jumpAction.started += OnJump;
+
+
         m_rigidbody = GetComponent<Rigidbody>();
         m_animator = GetComponent<Animator>();
     }
 
-    public void OnMove(InputValue value)
+    public void OnMove(InputAction.CallbackContext value)
     {
-        m_moveAmt = value.Get<Vector2>();
+        if (value.canceled)
+        {
+            m_moveAmt = Vector2.zero;
+
+            if (m_animator != null)
+            {
+                m_animator.SetFloat("front", m_moveAmt.y);
+                m_animator.SetFloat("right", m_moveAmt.x);
+            }
+            return;
+        }
+        m_moveAmt = value.ReadValue<Vector2>();
+
+        if (m_animator != null)
+        {
+            m_animator.SetFloat("front", m_moveAmt.y);
+            m_animator.SetFloat("right", m_moveAmt.x);
+        }
     }
 
-    public void OnLook(InputValue value)
+    public void OnLook(InputAction.CallbackContext value)
     {
-        m_lookAmt = value.Get<Vector2>();
+        if (value.canceled)
+        {
+            m_lookAmt = Vector2.zero;
+            return;
+        }
+        m_lookAmt = value.ReadValue<Vector2>();
     }
 
-    public void OnJump(InputValue value)
+    public void OnJump(InputAction.CallbackContext value)
     {
+        if (m_isJumping) return;
         if (m_rigidbody != null)
         {
             m_rigidbody.AddForce(Vector3.up * m_jumpSpeed, ForceMode.Impulse);
+            m_isJumping = true;
         }
     }
 
@@ -53,6 +101,7 @@ public class PlayerMove : MonoBehaviour
 
         Vector3 moveDir = transform.forward * m_moveAmt.y + transform.right * m_moveAmt.x;
         m_rigidbody.MovePosition(m_rigidbody.position + m_speed * Time.deltaTime * moveDir);
+
     }
 
     private void Rotating()
@@ -65,5 +114,13 @@ public class PlayerMove : MonoBehaviour
         float rotationAmount = m_lookAmt.x * m_rotateSpeed * Time.deltaTime;
         Quaternion deltaRotation = Quaternion.Euler(0, rotationAmount, 0);
         m_rigidbody.MoveRotation(m_rigidbody.rotation * deltaRotation);
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (m_isJumping)
+        {
+            m_isJumping = false;
+        }
     }
 }
