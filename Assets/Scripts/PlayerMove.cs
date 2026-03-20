@@ -1,9 +1,10 @@
-using Unity.VisualScripting;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 
 [RequireComponent(typeof(Rigidbody), typeof(Animator), typeof(PlayerInput))]
-public class PlayerMove : MonoBehaviour
+public class PlayerMove : NetworkBehaviour
 {
     PlayerInput m_playerInput;
     InputActionMap m_playerActionMap;
@@ -27,6 +28,7 @@ public class PlayerMove : MonoBehaviour
     [SerializeField] LayerMask m_groundLayer;
     static private float m_maxGroundDistance = 0f;
     [SerializeField] float m_GroundDistance = 0.1f;
+
     private void Awake()
     {
         m_rigidbody = GetComponent<Rigidbody>();
@@ -39,31 +41,42 @@ public class PlayerMove : MonoBehaviour
 
         CapsuleCollider collider = GetComponent<CapsuleCollider>();
         m_capsuleColliderRadius = collider.radius;
+
+        m_playerInput = GetComponent<PlayerInput>();
+        m_playerInput.enabled = false;
+        m_playerActionMap = m_playerInput.actions.FindActionMap("Player");
     }
 
     void OnEnable()
     {
-        m_playerInput = GetComponent<PlayerInput>();
-        m_playerActionMap = m_playerInput.actions.FindActionMap("Player");
-
         m_moveAction = m_playerActionMap.FindAction("Move");
         m_moveAction.performed += OnMove;
         m_moveAction.canceled += OnMove;
-
         m_jumpAction = m_playerActionMap.FindAction("Jump");
         m_jumpAction.started += StartJump;
     }
     void OnDisable()
     {
-        m_playerInput = GetComponent<PlayerInput>();
-        m_playerActionMap = m_playerInput.actions.FindActionMap("Player");
-
         m_moveAction = m_playerActionMap.FindAction("Move");
         m_moveAction.performed -= OnMove;
         m_moveAction.canceled -= OnMove;
 
         m_jumpAction = m_playerActionMap.FindAction("Jump");
         m_jumpAction.started -= StartJump;
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        enabled = IsClient;
+        if (!IsOwner)
+        {
+            enabled = false;
+            m_playerInput.enabled = false;
+            return;
+        }
+
+        m_playerInput.enabled = true;
     }
 
     public void OnMove(InputAction.CallbackContext value)
