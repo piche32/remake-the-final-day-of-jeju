@@ -17,6 +17,8 @@ GameObject:
   - component: {fileID: 7989651041820867411}
   - component: {fileID: 4445227682781243966}
   - component: {fileID: 7077374506384130913}
+  - component: {fileID: 8819968647265604972}
+  - component: {fileID: 3144840876821933987}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -104,7 +106,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 2629606870
+  GlobalObjectIdHash: 3274493941
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -293,6 +295,33 @@ MonoBehaviour:
       Synchronize: 1
       ParameterType: 9
   AnimatorParametersExpanded: 0
+--- !u!114 &8819968647265604972
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8094735125656336893}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b5d5154974feb644a116bd1ca36d9ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerManager
+  ShowTopMostFoldoutHeaderGroup: 1
+  m_playerCameraPrefab: {fileID: 6325576259865936198, guid: 7f0302bf0df303548b95ab52f150b2a1, type: 3}
+--- !u!114 &3144840876821933987
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8094735125656336893}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ba84abbf3bebac41a224c7b354582bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ServerPlayerMove
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!1001 &3671969725652369887
 PrefabInstance:
   m_ObjectHideFlags: 0
