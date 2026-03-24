@@ -1,10 +1,10 @@
 using UnityEngine;
 using Unity.Netcode;
 
-[DefaultExecutionOrder(0)] //ClientNetworkTransform 전에 실행
-public class ServerPlayerMove : NetworkBehaviour
+public class ServerPlayerMove : NetworkBehaviour, INetworkInitializable
 {
-    public override void OnNetworkSpawn()
+    public int InitializationPriority => 0; //PlayerMove보다 먼저 실행되어야 함.
+    public void NetworkInitialize()
     {
         if (!IsServer)
         {
@@ -12,7 +12,6 @@ public class ServerPlayerMove : NetworkBehaviour
             return;
         }
         SpawnPlayer();
-        base.OnNetworkSpawn();
     }
 
     void SpawnPlayer()

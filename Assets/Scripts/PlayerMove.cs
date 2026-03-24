@@ -1,10 +1,10 @@
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.LowLevel;
+
 
 [RequireComponent(typeof(Rigidbody), typeof(Animator), typeof(PlayerInput))]
-public class PlayerMove : NetworkBehaviour
+public class PlayerMove : NetworkBehaviour, INetworkInitializable
 {
     PlayerInput m_playerInput;
     InputActionMap m_playerActionMap;
@@ -65,9 +65,10 @@ public class PlayerMove : NetworkBehaviour
         m_jumpAction.started -= StartJump;
     }
 
-    public override void OnNetworkSpawn()
+    public int InitializationPriority => 10; //ServerPlayerMove보다 늦게 실행되어야 함.
+
+    public void NetworkInitialize()
     {
-        base.OnNetworkSpawn();
         enabled = IsClient;
         if (!IsOwner)
         {
