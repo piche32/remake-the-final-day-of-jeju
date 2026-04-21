@@ -1,0 +1,8 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:Template name="CurrentSessionWithHost" src="project://database/Assets/Blocks/CommonSession/UI/CurrentSessionWithHost.uxml?fileID=9197481963319205126&amp;guid=7d6285d3345e4d34d8da4710d313b64d&amp;type=3#CurrentSessionWithHost"/>
+    <ui:Template name="JoinSessionByCode" src="project://database/Assets/Blocks/MultiplayerSession/UI/JoinSessionByCode.uxml?fileID=9197481963319205126&amp;guid=420e22b2b75d36946ada66636dd40a20&amp;type=3#JoinSessionByCode"/>
+    <ui:VisualElement data-source="../../Settings/SessionSettings.asset?fileID=11400000&amp;guid=0bf4e1684added44da254017c7fc41b2&amp;type=2#SessionSettings" class="blocks-debug-menu">
+        <ui:Instance template="JoinSessionByCode" class="blocks-element--space-right"/>
+        <ui:Instance template="CurrentSessionWithHost"/>
+    </ui:VisualElement>
+</ui:UXML>
