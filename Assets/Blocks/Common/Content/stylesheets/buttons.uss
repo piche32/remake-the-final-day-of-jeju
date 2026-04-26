@@ -30,6 +30,16 @@
     border-color: var(--color-inactive);
     background-color: transparent;
 }
+.blocks-button.is-on {
+    background-color: var(--color-default);
+    border-color: var(--color-default);
+    color: var(--color-dark-content);
+}
+.blocks-button.is-on:hover {
+    background-color: var(--color-neutral);
+    border-color: var(--color-neutral);
+    color: var(--color-dark-content);
+}
 
 .blocks-button--xs {
     height: var(--base-unit-lg);

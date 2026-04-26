@@ -72,6 +72,7 @@ namespace Blocks.Sessions.Common
         {
             if (m_SessionObserver != null)
             {
+                m_SessionObserver.SessionAdded -= OnSessionAdded;
                 m_SessionObserver.Dispose();
                 m_SessionObserver = null;
             }

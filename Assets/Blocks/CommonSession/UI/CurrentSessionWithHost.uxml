@@ -30,7 +30,12 @@
             </Bindings>
         </Blocks.Sessions.Common.PlayerListViewElement>
         <engine:VisualElement style="flex-grow: 1; flex-direction: row;">
-            <Jeju.LobbyStartButton>
+            <Jeju.LobbyReadyButton>
+                <Bindings>
+                    <engine:DataBinding property="SessionType" data-source-path="sessionType" binding-mode="ToTarget"/>
+                </Bindings>
+            </Jeju.LobbyReadyButton>
+            <Jeju.LobbyStartButton selectable="false" focusable="false" double-click-selects-word="true" style="display: flex; visibility: visible;">
                 <Bindings>
                     <engine:DataBinding property="SessionType" binding-mode="ToTarget" data-source-path="sessionType"/>
                 </Bindings>
