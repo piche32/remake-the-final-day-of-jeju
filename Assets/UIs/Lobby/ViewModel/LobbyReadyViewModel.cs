@@ -2,6 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using Unity.Properties;
 using Unity.Services.Multiplayer;
+using UnityEngine;
 using UnityEngine.UIElements;
 public class LobbyReadyViewModel : IDataSourceViewHashProvider, INotifyBindablePropertyChanged
 {
@@ -9,7 +10,7 @@ public class LobbyReadyViewModel : IDataSourceViewHashProvider, INotifyBindableP
     ISession m_Session;
     long m_UpdateVersion;
 
-    [CreateProperty]
+    [CreateProperty, UxmlAttribute]
     public bool IsClient
     {
         get => m_IsClient;
@@ -26,7 +27,7 @@ public class LobbyReadyViewModel : IDataSourceViewHashProvider, INotifyBindableP
     }
     bool m_IsClient;
 
-    [CreateProperty]
+    [CreateProperty, UxmlAttribute]
     public bool IsReady
     {
         get => m_IsReady;
@@ -101,12 +102,33 @@ public class LobbyReadyViewModel : IDataSourceViewHashProvider, INotifyBindableP
         }
     }
 
-    public void SetReady()
+    public async void SetReady()
     {
-        IsReady = !IsReady;
-        PlayerProperty ReadyProperty = new PlayerProperty(IsReady.ToString());
+        if (m_Session == null)
+        {
+            Debug.LogError("Session is null");
+            return;
+        }
+        if (m_Session.CurrentPlayer == null)
+        {
+            Debug.LogError("Player is null");
+            return;
+        }
 
-        m_Session?.CurrentPlayer?.SetProperty(Define.Network.Ready, ReadyProperty);
+        IsReady = !IsReady;
+        var readyProperty = new PlayerProperty(IsReady.ToString());
+
+        try
+        {
+            m_Session.CurrentPlayer.SetProperty(Define.Network.Ready, readyProperty);
+            await m_Session.SaveCurrentPlayerDataAsync();
+
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Error setting ready property: {e.Message}");
+            IsReady = !IsReady;
+        }
     }
 
     public long GetViewHashCode() => m_UpdateVersion;
