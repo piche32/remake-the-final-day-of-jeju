@@ -33,6 +33,12 @@ namespace Jeju
         }
         string m_SessionType;
 
+        [CreateProperty, UxmlAttribute]
+        public bool Visibility
+        {
+            get => style.display == DisplayStyle.Flex;
+            set => style.display = value ? DisplayStyle.Flex : DisplayStyle.None;
+        }
         public LobbyStartButton()
         {
             text = k_LobbyStartButtonText;

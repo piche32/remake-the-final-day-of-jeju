@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+using System.Linq;
 using Unity.Netcode;
 using Unity.Properties;
 using Unity.Services.Multiplayer;
@@ -11,6 +12,7 @@ public class LobbyStartViewModel : IDataSourceViewHashProvider, INotifyBindableP
 {
     SessionObserver m_SessionObserver;
     ISession m_Session;
+    long m_UpdateVersion;
     [CreateProperty]
     public bool CanStartGame
     {
@@ -22,6 +24,7 @@ public class LobbyStartViewModel : IDataSourceViewHashProvider, INotifyBindableP
                 return;
             }
             m_CanStartGame = value;
+            ++m_UpdateVersion;
             Notify();
         }
     }
@@ -37,6 +40,7 @@ public class LobbyStartViewModel : IDataSourceViewHashProvider, INotifyBindableP
                 return;
             }
             m_IsHost = value;
+            ++m_UpdateVersion;
             Notify();
         }
     }
@@ -63,8 +67,8 @@ public class LobbyStartViewModel : IDataSourceViewHashProvider, INotifyBindableP
             m_Session.RemovedFromSession += OnSessionRemoved;
             m_Session.Deleted += OnSessionRemoved;
 
-            m_Session.PlayerJoined += UpdateCanStartGame;
-            m_Session.PlayerHasLeft += UpdateCanStartGame;
+            m_Session.PlayerJoined += UpdateCanStartGameWithPlayerId;
+            m_Session.PlayerHasLeft += UpdateCanStartGameWithPlayerId;
             m_Session.PlayerPropertiesChanged += UpdateCanStartGame;
 
             UpdateCanStartGame();
@@ -84,8 +88,8 @@ public class LobbyStartViewModel : IDataSourceViewHashProvider, INotifyBindableP
         m_Session.RemovedFromSession -= OnSessionRemoved;
         m_Session.Deleted -= OnSessionRemoved;
 
-        m_Session.PlayerJoined -= UpdateCanStartGame;
-        m_Session.PlayerHasLeft -= UpdateCanStartGame;
+        m_Session.PlayerJoined -= UpdateCanStartGameWithPlayerId;
+        m_Session.PlayerHasLeft -= UpdateCanStartGameWithPlayerId;
         m_Session.PlayerPropertiesChanged -= UpdateCanStartGame;
         m_Session = null;
     }
@@ -106,36 +110,27 @@ public class LobbyStartViewModel : IDataSourceViewHashProvider, INotifyBindableP
         }
     }
 
-    void UpdateCanStartGame(string playerId)
+    void UpdateCanStartGameWithPlayerId(string playerId)
     {
         UpdateCanStartGame();
     }
 
     void UpdateCanStartGame()
     {
-        bool isAllReady = true;
-        foreach (IReadOnlyPlayer player in m_Session.Players)
-        {
-            if (player.Id.Equals(m_Session.CurrentPlayer.Id))
-            {
-                continue;
-            }
-            if (!player.Properties.TryGetValue(Define.Network.Ready, out PlayerProperty Ready) || !bool.Parse(Ready.Value))
-            {
-                isAllReady = false;
-                break;
-            }
-        }
-
-        if (isAllReady == false)
+        if (m_Session?.Players == null || m_Session.Players.Count <= 1)
         {
             CanStartGame = false;
             return;
         }
-        else
-        {
-            CanStartGame = true;
-        }
+
+        bool allClientsReady = m_Session.Players
+            .Where(p => p.Id != m_Session.CurrentPlayer.Id)
+            .All(p =>
+                p.Properties.TryGetValue(Define.Network.Ready, out PlayerProperty readyProperty) &&
+                bool.TryParse(readyProperty.Value, out bool isReady) &&
+                isReady);
+
+        CanStartGame = allClientsReady;
     }
 
     public void StartGame()
@@ -146,7 +141,7 @@ public class LobbyStartViewModel : IDataSourceViewHashProvider, INotifyBindableP
         }
     }
 
-    public long GetViewHashCode() => m_IsHost ? m_CanStartGame ? 2 : 1 : 0;
+    public long GetViewHashCode() => m_UpdateVersion;
     public event EventHandler<BindablePropertyChangedEventArgs> propertyChanged;
 
     void Notify([CallerMemberName] string property = null)
