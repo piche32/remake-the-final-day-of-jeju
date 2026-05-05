@@ -7,7 +7,6 @@ using Unity.Services.Multiplayer;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.SceneManagement;
-
 public class LobbyStartViewModel : IDataSourceViewHashProvider, INotifyBindablePropertyChanged
 {
     SessionObserver m_SessionObserver;
@@ -115,9 +114,22 @@ public class LobbyStartViewModel : IDataSourceViewHashProvider, INotifyBindableP
         UpdateCanStartGame();
     }
 
-    void UpdateCanStartGame()
+    private bool m_IsUpdating = false;
+    async void UpdateCanStartGame()
     {
-        if (m_Session?.Players == null || m_Session.Players.Count <= 1)
+        if (m_IsUpdating) return;
+        m_IsUpdating = true;
+
+        await Awaitable.NextFrameAsync();
+
+        m_IsUpdating = false;
+
+        if (m_Session == null)
+        {
+            CanStartGame = false;
+            return;
+        }
+        if (m_Session.Players == null || m_Session.Players.Count <= 1)
         {
             CanStartGame = false;
             return;
